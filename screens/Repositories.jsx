@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
+import ModalSelector from "react-native-modal-selector";
 import { useAuth } from "../context/index.jsx";
 import { getRepositories } from "../services/index.js";
 import { ProgressBar } from "../components/index.jsx";
+import { useFilterAndSortRepositories } from "../hooks/useSortAndFilterRepositories.jsx";
 
 const Repositories = () => {
   const [repos, setRepos] = useState([]);
@@ -11,6 +13,15 @@ const Repositories = () => {
   const [currentScroll, setCurrentScroll] = useState(0);
   const [totalScroll, setTotalScroll] = useState(1);
   const { authData } = useAuth();
+  const {
+    sort,
+    setSort,
+    sortOptions,
+    filter,
+    setFilter,
+    filterOptions,
+    applyFilterAndSort,
+  } = useFilterAndSortRepositories();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,10 +53,36 @@ const Repositories = () => {
     setTotalScroll(totalHeight);
   };
 
+  const displayedRepos = applyFilterAndSort(repos);
+
   return (
     <View style={styles.container}>
+      <View style={styles.filterContainer}>
+        <Text style={styles.label}>Ordenar por:</Text>
+        <ModalSelector
+          data={sortOptions.map(({ key, label }) => ({ key, label }))}
+          onChange={(option) => setSort(option.key)}
+          initValue="Escolha uma opção"
+          cancelText="Cancelar"
+          style={styles.modalSelector}
+          initValueTextStyle={styles.modalText}
+          selectTextStyle={styles.modalText}
+        />
+
+        <Text style={styles.label}>Filtrar por:</Text>
+        <ModalSelector
+          data={filterOptions.map(({ key, label }) => ({ key, label }))}
+          onChange={(option) => setFilter(option.key)}
+          initValue="Escolha um filtro"
+          cancelText="Cancelar"
+          style={styles.modalSelector}
+          initValueTextStyle={styles.modalText}
+          selectTextStyle={styles.modalText}
+        />
+      </View>
+
       <FlatList
-        data={repos}
+        data={displayedRepos}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.repo}>
@@ -67,6 +104,25 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#f0f4f8",
+  },
+  filterContainer: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  modalSelector: {
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    backgroundColor: "#fff",
+  },
+  modalText: {
+    fontSize: 16,
+    padding: 10,
   },
   repo: {
     padding: 20,
