@@ -10,6 +10,7 @@ import RepositoriesScreen from "../screens/Repositories";
 import IssueScreen from "../screens/Issue";
 import RepositoryDetailsScreen from "../screens/RepositoryDetails";
 import { useAuth } from "../context/index.jsx";
+import IssueDetailsScreen from "../screens/IssueDetails";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,16 +54,23 @@ const AppNavigator = () => {
           <Stack.Screen name="Login" component={LoginScreen} />
         ) : (
           <>
-            <Stack.Screen 
-              name="Main" 
-              component={BottomTabs} 
+            <Stack.Screen
+              name="Main"
+              component={BottomTabs}
               options={{ headerShown: false }}
             />
-            <Stack.Screen 
-              name="RepositoryDetails" 
-              component={RepositoryDetailsScreen} 
-              options={({ route }) => ({ 
-                title: route.params.repository.name 
+            <Stack.Screen
+              name="RepositoryDetails"
+              component={RepositoryDetailsScreen}
+              options={({ route }) => ({
+                title: route.params.repository.name,
+              })}
+            />
+            <Stack.Screen
+              name="IssueDetails"
+              component={IssueDetailsScreen}
+              options={({ route }) => ({
+                title: route.params.issue.title,
               })}
             />
           </>

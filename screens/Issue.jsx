@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import ModalSelector from "react-native-modal-selector";
 import { useAuth } from "../context/index.jsx";
 import { getIssues } from "../services/index.js";
 import { ProgressBar } from "../components/index.jsx";
 import { useSortAndFilterIssues } from "../hooks/useSortAndFilterIssues.jsx";
+import { useNavigation } from "@react-navigation/native"; 
 
 const Issues = () => {
   const [issues, setIssues] = useState([]);
@@ -13,15 +20,10 @@ const Issues = () => {
   const [currentScroll, setCurrentScroll] = useState(0);
   const [totalScroll, setTotalScroll] = useState(1);
   const { authData } = useAuth();
+  const navigation = useNavigation();
 
-  const {
-    sort,
-    setSort,
-    sortOptions,
-    filter,
-    setFilter,
-    filterOptions,
-  } = useSortAndFilterIssues();
+  const { sort, setSort, sortOptions, filter, setFilter, filterOptions } =
+    useSortAndFilterIssues();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,8 +62,10 @@ const Issues = () => {
       return true;
     })
     .sort((a, b) => {
-      if (sort === "created") return new Date(b.created_at) - new Date(a.created_at);
-      if (sort === "updated") return new Date(b.updated_at) - new Date(a.updated_at);
+      if (sort === "created")
+        return new Date(b.created_at) - new Date(a.created_at);
+      if (sort === "updated")
+        return new Date(b.updated_at) - new Date(a.updated_at);
       if (sort === "comments") return b.comments - a.comments;
       return 0;
     });
@@ -99,21 +103,22 @@ const Issues = () => {
           data={filteredAndSortedIssues}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.issue}>
+            <TouchableOpacity
+              style={styles.issue}
+              onPress={() =>
+                navigation.navigate("IssueDetails", { issue: item })
+              }
+            >
               <Text style={styles.title}>{item.title}</Text>
               <Text style={styles.body}>{item.body}</Text>
-            </View>
+            </TouchableOpacity>
           )}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          onScroll={handleScroll}
         />
       )}
       <ProgressBar current={currentScroll} total={totalScroll} />
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
