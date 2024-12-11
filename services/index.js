@@ -1,1 +1,1 @@
-export * from "./github.js";
+export * from "./api/github.js";

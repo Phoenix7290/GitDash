@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  StyleSheet, 
+  TouchableOpacity 
+} from "react-native";
 import ModalSelector from "react-native-modal-selector";
 import { useAuth } from "../context/index.jsx";
 import { getRepositories } from "../services/index.js";
 import { ProgressBar } from "../components/index.jsx";
 import { useFilterAndSortRepositories } from "../hooks/useSortAndFilterRepositories.jsx";
 
-const Repositories = () => {
+const RepositoriesScreen = ({ navigation }) => {
   const [repos, setRepos] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -53,6 +59,10 @@ const Repositories = () => {
     setTotalScroll(totalHeight);
   };
 
+  const handleRepositoryPress = (repository) => {
+    navigation.navigate('RepositoryDetails', { repository });
+  };
+
   const displayedRepos = applyFilterAndSort(repos);
 
   return (
@@ -85,10 +95,13 @@ const Repositories = () => {
         data={displayedRepos}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.repo}>
+          <TouchableOpacity 
+            style={styles.repo} 
+            onPress={() => handleRepositoryPress(item)}
+          >
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.description}>{item.description}</Text>
-          </View>
+          </TouchableOpacity>
         )}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
@@ -146,4 +159,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Repositories;
+export default RepositoriesScreen;
