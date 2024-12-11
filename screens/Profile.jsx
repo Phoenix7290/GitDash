@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { TextInput, Button, Image, StyleSheet, View, Text, useWindowDimensions, SafeAreaView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  Image, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  SafeAreaView 
+} from 'react-native';
 import { useAuth } from '../context/index.jsx';
 import { getUserProfile } from '../services/index.js';
 
-const Profile = () => {
+const Profile = ({ navigation }) => {
   const [profile, setProfile] = useState(null);
   const { authData } = useAuth();
-  const { width, height } = useWindowDimensions();
-  const isHorizontal = width > height;
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -18,84 +24,134 @@ const Profile = () => {
         console.error(error);
       }
     };
-
     fetchProfile();
   }, [authData]);
 
   if (!profile) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.loadingText}>Carregando...</Text>
-      </SafeAreaView>
-    );
+    return <Text style={styles.loadingText}>Carregando...</Text>;
   }
 
   return (
-    <SafeAreaView style={[styles.container, isHorizontal ? styles.horizontalLayout : styles.verticalLayout]}>
-      <Image source={{ uri: profile.avatar_url }} style={styles.icon} />
-      <View style={styles.infoContainer}>
-        <Text style={styles.userText}>{profile.name}</Text>
-        <Text style={styles.reposText}>Repositórios: {profile.public_repos}</Text>
-      </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Image
+        source={{ uri: profile.avatar_url }}
+        style={styles.avatar}
+      />
+      <Text style={styles.name}>{profile.name}</Text>
+      <Text style={styles.login}>@{profile.login}</Text>
+
       <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>Seguidores: {profile.followers}</Text>
-        <Text style={styles.statsText}>Seguindo: {profile.following}</Text>
+        <View style={styles.statsCard}>
+          <Text style={styles.statsLabel}>Repos</Text>
+          <Text style={styles.statsValue}>{profile.public_repos}</Text>
+        </View>
+        <View style={styles.statsCard}>
+          <Text style={styles.statsLabel}>Following</Text>
+          <Text style={styles.statsValue}>{profile.following}</Text>
+        </View>
+        <View style={styles.statsCard}>
+          <Text style={styles.statsLabel}>Followers</Text>
+          <Text style={styles.statsValue}>{profile.followers}</Text>
+        </View>
       </View>
-    </SafeAreaView>
+
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Repositories')}
+        >
+          <Text style={styles.buttonText}>Repositórios</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Issues')}
+        >
+          <Text style={styles.buttonText}>Issues</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#101526',
     padding: 20,
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5', 
   },
-  verticalLayout: {
-    justifyContent: 'space-between', 
-    paddingVertical: 40, 
-  },
-  horizontalLayout: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  icon: {
+  avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: '#1A6DD9',
+    marginBottom: 20,
   },
-  infoContainer: {
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  userText: {
-    fontSize: 22,
+  name: {
+    fontSize: 24,
+    color: '#FFFFFF',
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5, 
+    marginBottom: 10,
   },
-  reposText: {
-    fontSize: 16,
-    color: '#666',
+  login: {
+    fontSize: 18,
+    color: '#2291F2',
+    marginBottom: 20,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    width: '80%',
-    marginBottom: 20, 
+    width: '100%',
+    marginTop: 20,
   },
-  statsText: {
+  statsCard: {
+    backgroundColor: '#1A2637',
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '28%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  statsLabel: {
     fontSize: 16,
-    color: '#555',
+    color: '#AAAAAA',
+  },
+  statsValue: {
+    fontSize: 18,
+    color: '#2291F2',
+    fontWeight: 'bold',
   },
   loadingText: {
     fontSize: 18,
-    color: '#999',
+    color: '#2291F2',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 30,
+  },
+  button: {
+    backgroundColor: '#1A6DD9',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    width: '45%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 
